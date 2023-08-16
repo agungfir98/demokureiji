@@ -4,7 +4,7 @@ import { api } from '@/utils/api'
 import { useQuery } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
 import { useRouter } from 'next/navigation'
-import React, { ReactNode, useEffect } from 'react'
+import React, { ReactNode } from 'react'
 
 const AuthLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const router = useRouter()
@@ -19,10 +19,6 @@ const AuthLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
       return error.response?.status !== 401
     },
   })
-
-  useEffect(() => {
-    console.log('signin', error)
-  }, [error])
 
   if (isLoading) {
     return <LoadingScreen />
