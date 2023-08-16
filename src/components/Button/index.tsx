@@ -1,6 +1,6 @@
 import clsx from 'clsx'
 import { cva, VariantProps } from 'class-variance-authority'
-import Spinner from '@/components/spinner'
+import { LoadingOutlined } from '@ant-design/icons'
 
 const ButtonVariance = cva('font-semibold flex gap-2 items-center', {
   variants: {
@@ -10,7 +10,7 @@ const ButtonVariance = cva('font-semibold flex gap-2 items-center', {
       default: 'rounded-none',
     },
     size: {
-      sm: 'px-3 text-sm',
+      sm: 'px-3 py-1 text-sm',
       md: 'px-3 py-2 text-md',
       xl: 'px-5 py-3 text-xl',
     },
@@ -20,10 +20,10 @@ const ButtonVariance = cva('font-semibold flex gap-2 items-center', {
       primary: 'bg-blue-500 hover:bg-blue-400 text-white',
       warning: 'bg-yellow-500 hover:bg-yellow-400 text-black',
       danger: 'bg-red-500 hover:bg-red-400 text-white',
+      link: 'bg-transparent w-fit h-fit',
     },
   },
   defaultVariants: {
-    size: 'md',
     shape: 'default',
     variant: 'default',
   },
@@ -51,7 +51,7 @@ const Button: React.FC<CustomButtonProps> = ({
         ButtonVariance({ shape, size, variant }),
       )}
     >
-      {loading && <Spinner />}
+      {loading && <LoadingOutlined />}
       {props.children}
     </button>
   )
