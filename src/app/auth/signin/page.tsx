@@ -1,12 +1,12 @@
 'use client'
 import Button from '@/components/Button'
 import { api } from '@/utils/api'
-import { setAccessToken } from '@/utils/accesstoken'
 import { useMutation } from '@tanstack/react-query'
 import { Form, Input } from 'antd'
 import axios, { AxiosError } from 'axios'
 import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
+import { useTokenSlice } from '@/slice/tokenStore'
 
 type FieldType = {
   email: string
@@ -15,12 +15,12 @@ type FieldType = {
 
 const LoginPage: React.FC = () => {
   const route = useRouter()
+  const { setAccessToken } = useTokenSlice((state) => state)
 
   const mutation = useMutation({
     mutationFn: (data: FieldType) => api.post('/login', data),
     onSuccess(res) {
       const { token } = res.data
-      console.log('set', token)
       setAccessToken(token)
       toast.success('Berhasil login')
       route.push('/')
@@ -36,7 +36,6 @@ const LoginPage: React.FC = () => {
   })
 
   const onSubmitLoginForm = (values: FieldType) => {
-    console.log(values)
     mutation.mutate(values)
   }
 
