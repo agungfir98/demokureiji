@@ -4,16 +4,17 @@ export interface VoteEventType {
   _id: string
   voteTitle: string
   isActive: boolean
+  status: 'inactive' | 'active' | 'finished'
   candidates: {
     calonKetua: string
     wakitKetua: string
     description: string
-    numberOfVotes: number
+    numOfVotes: number
     _id: string
   }[]
   holder: OrganizationType
   registeredVoters: {
-    voter: string
+    voter: { _id: string; name: string }
     hasVoted: boolean
     _id: string
   }[]
