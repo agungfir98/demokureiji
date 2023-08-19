@@ -7,6 +7,8 @@ import { UserType } from '@/types/user-type'
 import { List, Skeleton } from 'antd'
 import Link from 'next/link'
 import { EditTwoTone } from '@ant-design/icons'
+import { MainHeading } from '@/components/heading'
+import Chip from '@/components/chip'
 
 const Home: React.FC = () => {
   const { accessToken } = useTokenSlice((state) => state)
@@ -24,7 +26,7 @@ const Home: React.FC = () => {
   return (
     <div>
       <div>
-        <h1>Active Vote</h1>
+        <MainHeading>Active Vote</MainHeading>
         <p className="text-sm text-slate-400">
           total: {activeEventList?.length}
         </p>
@@ -62,14 +64,10 @@ const Home: React.FC = () => {
                       <p>Candidates:</p>
                       <div className="flex gap-1 items-center">
                         {item.candidates.map((calon, i) => (
-                          <span
-                            key={i}
-                            className="bg-slate-200 text-slate-700 px-2 py-0.5 rounded-2xl"
-                          >
-                            {index ? ', ' : ''}
+                          <Chip key={i}>
                             {calon.calonKetua}
                             {calon.wakitKetua && ' & ' + calon.wakitKetua}
-                          </span>
+                          </Chip>
                         ))}
                       </div>
                     </>
