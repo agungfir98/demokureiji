@@ -1,18 +1,18 @@
 'use client'
 import LoadingScreen from '@/components/loadingScreen'
 import Navbar from '@/components/navbar'
-import { apiGet, apiPost } from '@/utils/api'
+import { APIReturnType, apiGet, apiPost } from '@/utils/api'
 import { useQuery } from '@tanstack/react-query'
 import { HomeTwoTone, TeamOutlined } from '@ant-design/icons'
 import { Menu } from 'antd'
 import type { MenuProps } from 'antd'
 import { AxiosError } from 'axios'
-import { useRouter } from 'next/navigation'
 import { ReactNode } from 'react'
 import { useNavSlice } from '@/slice/globalslice'
 import { useTokenSlice } from '@/slice/tokenStore'
 import Link from 'next/link'
 import { UserType } from '@/types/user-type'
+import toast from 'react-hot-toast'
 
 type MenuItem = Required<MenuProps>['items'][number]
 
@@ -27,7 +27,6 @@ function getItem(
 }
 
 const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const router = useRouter()
   const { setAccessToken, accessToken } = useTokenSlice((state) => state)
   const navCollapsed = useNavSlice((state) => state.navCollapsed)
 
@@ -40,7 +39,7 @@ const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
       setAccessToken(token)
     },
     onError() {
-      router.push('/auth/signin')
+      toast.error('something happen, please refresh the page')
     },
     refetchOnWindowFocus: false,
     refetchInterval: 540000,
@@ -50,9 +49,11 @@ const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
   })
 
   const { data: userData } = useQuery({
-    queryKey: ['user', accessToken],
+    queryKey: ['user'],
     queryFn: () =>
-      apiGet<UserType>('/user', accessToken).then((res) => res.data),
+      apiGet<APIReturnType<UserType>>('/user', accessToken).then(
+        (res) => res.data,
+      ),
     enabled: !!accessToken,
     refetchOnWindowFocus: false,
   })
