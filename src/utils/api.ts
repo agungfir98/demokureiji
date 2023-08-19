@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from 'axios'
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios'
 
 const URI = process.env.NEXT_PUBLIC_URI
 
@@ -13,16 +13,37 @@ const headers = (token?: string) => ({
   },
 })
 
+export interface APIReturnType<T> {
+  result: T
+}
+
 export const apiGet = async <T>(
   path: string,
   accessToken?: string,
-): Promise<AxiosResponse<{ result: T }>> => {
+): Promise<AxiosResponse<T>> => {
   return api.get(path, headers(accessToken))
 }
 
-export const apiPost = async <T>(
+export const apiPost = async <T, P = object>(
   path: string,
+  payload?: P,
   accessToken?: string,
 ): Promise<AxiosResponse<T>> => {
-  return api.post(path, headers(accessToken))
+  return api.post<AxiosRequestConfig<P>, AxiosResponse<T>>(
+    path,
+    payload,
+    headers(accessToken),
+  )
+}
+
+export const apiPut = async <T, P = object>(
+  path: string,
+  payload?: P,
+  accessToken?: string,
+): Promise<AxiosResponse<T>> => {
+  return api.put<AxiosRequestConfig<P>, AxiosResponse<T>>(
+    path,
+    payload,
+    headers(accessToken),
+  )
 }
