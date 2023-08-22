@@ -9,8 +9,9 @@ export interface VoteEventType {
     calonKetua: string
     wakitKetua: string
     description: string
-    numOfVotes: number
-    _id: string
+    numOfVotes?: number
+    _id?: string
+    image: { url: string }
   }[]
   holder: OrganizationType
   registeredVoters: {
