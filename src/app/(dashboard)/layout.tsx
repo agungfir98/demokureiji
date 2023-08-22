@@ -42,7 +42,7 @@ const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
       toast.error('something happen, please refresh the page')
     },
     refetchOnWindowFocus: false,
-    refetchInterval: 540000,
+    refetchInterval: 300000,
     retry(_, error: AxiosError) {
       return error.response?.status !== 401
     },
