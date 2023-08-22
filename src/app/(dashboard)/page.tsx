@@ -20,7 +20,7 @@ const Home: React.FC = () => {
   })
 
   const activeEventList = data?.result.organization.flatMap((v) => {
-    return v.voteEvents.filter((item) => item.isActive && item)
+    return v.voteEvents.filter((item) => item.status === 'active' && item)
   })
 
   return (
