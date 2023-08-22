@@ -6,7 +6,7 @@ interface Member extends UserType {
 }
 export interface OrganizationType {
   _id: string
-  admin: string[]
+  admin: { name: string }[]
   description: string
   members: Member[]
   organization: string
