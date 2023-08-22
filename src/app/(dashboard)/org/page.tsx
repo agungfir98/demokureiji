@@ -3,7 +3,6 @@ import Button from '@/components/Button'
 import { MainHeading } from '@/components/heading'
 import { useTokenSlice } from '@/slice/tokenStore'
 import { OrganizationType } from '@/types/organization-type'
-import { UserType } from '@/types/user-type'
 import { APIReturnType, apiGet, apiPost } from '@/utils/api'
 import { PlusOutlined, TeamOutlined } from '@ant-design/icons'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -17,6 +16,10 @@ interface OrgForm {
   orgName: string
   description: string
 }
+interface OrgApiType<T> {
+  status: string
+  data: T
+}
 
 const Organization = () => {
   const [form] = Form.useForm()
@@ -26,9 +29,9 @@ const Organization = () => {
   const queryClient = useQueryClient()
 
   const { data, isLoading } = useQuery({
-    queryKey: ['user'],
+    queryKey: ['org-list'],
     queryFn: () =>
-      apiGet<APIReturnType<UserType>>('/user', accessToken).then(
+      apiGet<OrgApiType<OrganizationType>>('/org', accessToken).then(
         (res) => res.data,
       ),
     enabled: !!accessToken,
@@ -44,7 +47,7 @@ const Organization = () => {
         accessToken,
       ).then((res) => res.data.result),
     onSettled() {
-      queryClient.invalidateQueries({ queryKey: ['user'] })
+      queryClient.invalidateQueries({ queryKey: ['org-list'] })
       setShowModal(false)
     },
     onError(error) {
@@ -96,29 +99,31 @@ const Organization = () => {
         </Button>
       </div>
       <Skeleton active loading={isLoading}>
-        <List
-          dataSource={data?.result.organization}
-          size="small"
-          renderItem={(item, index) => (
-            <List.Item key={index}>
-              <List.Item.Meta
-                title={
-                  <Link href={`/org/${item._id}`} className="inline-block">
-                    <h2 className="text-base font-semibold">
-                      {item.organization}
-                    </h2>
-                  </Link>
-                }
-                description={
-                  <>
-                    <p>admins: {item.admin.map((v) => `${v.name}, `)}</p>
-                    <p>{item.description}</p>
-                  </>
-                }
-              />
-            </List.Item>
-          )}
-        />
+        {
+          <List
+            dataSource={data?.data as unknown as OrganizationType[]}
+            size="small"
+            renderItem={(item, index) => (
+              <List.Item key={index}>
+                <List.Item.Meta
+                  title={
+                    <Link href={`/org/${item._id}`} className="inline-block">
+                      <h2 className="text-base font-semibold">
+                        {item.organization}
+                      </h2>
+                    </Link>
+                  }
+                  description={
+                    <>
+                      <p>admins: {item.admin.map((v) => `${v.name}, `)}</p>
+                      <p>{item.description}</p>
+                    </>
+                  }
+                />
+              </List.Item>
+            )}
+          />
+        }
       </Skeleton>
     </div>
   )
