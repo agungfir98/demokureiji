@@ -50,7 +50,7 @@ const Navbar: React.FC<NavbarProp> = ({ userId, userName }) => {
         onCancel={() => setShowModal(false)}
         onOk={handleLogout}
       >
-        <h1>Yakin ingin keluar?</h1>
+        <h1>Loging out, are you sure?</h1>
       </Modal>
       <nav className="h-12 w-screen flex justify-between px-10 items-center bg-white">
         <Button
