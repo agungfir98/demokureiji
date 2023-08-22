@@ -9,3 +9,21 @@ export const useNavSlice = create<NavType>()((set) => ({
   toggleNavCollapsed: () =>
     set((state) => ({ navCollapsed: !state.navCollapsed })),
 }))
+
+interface GlobalStateType {
+  showMemberModal: boolean
+  toggleMemberModal: (arg: boolean) => void
+  showNewEventModal: boolean
+  toggleNewEventModal: (arg: boolean) => void
+}
+
+export const useGlobalStateSlice = create<GlobalStateType>()((set) => ({
+  showMemberModal: false,
+  toggleMemberModal(arg) {
+    set(() => ({ showMemberModal: arg }))
+  },
+  showNewEventModal: false,
+  toggleNewEventModal(arg) {
+    set(() => ({ showNewEventModal: arg }))
+  },
+}))
