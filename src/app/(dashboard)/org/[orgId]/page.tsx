@@ -39,7 +39,7 @@ interface OrgDataType extends APIReturnType<OrganizationType> {
 }
 
 interface EventField {
-  title: string
+  voteTitle: string
   candidates: VoteEventType['candidates']
 }
 
@@ -155,8 +155,9 @@ const NewEventModal = () => {
     >
       <Form layout="vertical" className="my-5" onFinish={handleSubmit}>
         <Form.Item<EventField>
-          name="title"
+          name="voteTitle"
           label={<Typography.Title level={5}>Event Name</Typography.Title>}
+          rules={[{ required: true, message: 'Title cannot be empty' }]}
         >
           <Input placeholder="event name" />
         </Form.Item>
@@ -322,7 +323,7 @@ const Organization: React.FC = () => {
                             {item.candidates.map((calon, index) => (
                               <Chip key={index}>
                                 {calon.calonKetua}
-                                {calon.wakitKetua && ' & ' + calon.wakitKetua}
+                                {calon.calonWakil && ' & ' + calon.calonWakil}
                               </Chip>
                             ))}
                           </span>
