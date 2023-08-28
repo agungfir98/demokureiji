@@ -39,7 +39,8 @@ const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
       setAccessToken(token)
     },
     onError() {
-      toast.error('something happen, please refresh the page')
+      console.error('something went wrong, please refresh the page')
+      toast.error('something went wrong, please refresh the page')
     },
     refetchOnWindowFocus: false,
     refetchInterval: 300000,
