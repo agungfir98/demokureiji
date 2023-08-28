@@ -15,6 +15,8 @@ interface GlobalStateType {
   toggleMemberModal: (arg: boolean) => void
   showNewEventModal: boolean
   toggleNewEventModal: (arg: boolean) => void
+  showCandidateModal: boolean
+  toggleCandidateModal: (arag: boolean) => void
 }
 
 export const useGlobalStateSlice = create<GlobalStateType>()((set) => ({
@@ -25,5 +27,9 @@ export const useGlobalStateSlice = create<GlobalStateType>()((set) => ({
   showNewEventModal: false,
   toggleNewEventModal(arg) {
     set(() => ({ showNewEventModal: arg }))
+  },
+  showCandidateModal: false,
+  toggleCandidateModal(arg) {
+    set(() => ({ showCandidateModal: arg }))
   },
 }))
