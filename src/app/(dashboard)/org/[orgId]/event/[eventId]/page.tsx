@@ -61,7 +61,7 @@ const CandidateModal: React.FC = () => {
         accessToken,
       ),
     onSettled() {
-			toast.success('Candidate successfully changed')
+      toast.success('Candidate successfully changed')
       queryClient.invalidateQueries({ queryKey: ['event-detail'] })
     },
   })
@@ -169,13 +169,16 @@ const EventDetail: React.FC = () => {
   const eventStatusMutation = useMutation({
     mutationKey: ['event-status'],
     mutationFn: (payload: { status: VoteEventType['status'] }) =>
-      apiPut(`/org/${orgId}/event/${eventId}/start`, payload, accessToken).then(
-        (res) => res.data,
-      ),
+      apiPut<APIReturnType<VoteEventType>>(
+        `/org/${orgId}/event/${eventId}/start`,
+        payload,
+        accessToken,
+      ).then((res) => res.data),
     onError() {
       toast.error('terjadi kesalahan')
     },
-    onSuccess() {
+    onSuccess(res) {
+      toast.success(`Event status is now ${res.result.status}`)
       queryClient.invalidateQueries({ queryKey: ['event-detail'] })
     },
   })
@@ -193,38 +196,49 @@ const EventDetail: React.FC = () => {
           <div>
             <MainHeading>{data?.result.voteTitle}</MainHeading>
             <p>Holder: {data?.result.holder.organization}</p>
-            {data?.result.status === 'active' && (
-              <Chip variant="success">Active</Chip>
-            )}
-            {data?.result.status === 'inactive' && (
-              <Chip variant="default">Inactive</Chip>
-            )}
-            {data?.result.status === 'finished' && (
-              <Chip variant="primary">Finished</Chip>
-            )}
+            <Chip
+              variant={
+                data?.result.status === 'active'
+                  ? 'success'
+                  : data?.result.status === 'finished'
+                  ? 'primary'
+                  : 'default'
+              }
+            >
+              {data?.result.status.charAt(0).toUpperCase()}
+              {data?.result.status.slice(1)}
+            </Chip>
           </div>
           <div className="mx-4">
-            {data?.result.status === 'active' && (
+            {data?.result.status !== 'finished' && (
               <Button
-                variant="danger"
+                variant={
+                  data?.result.status === 'active'
+                    ? 'danger'
+                    : data?.result.status === 'inactive'
+                    ? 'success'
+                    : 'default'
+                }
                 size="sm"
                 shape="round"
                 className="mx-4"
-                onClick={() =>
-                  eventStatusMutation.mutate({ status: 'finished' })
-                }
+                onClick={() => {
+                  data?.result.status === 'active' &&
+                    eventStatusMutation.mutate({ status: 'finished' })
+                  data?.result.status === 'inactive' &&
+                    eventStatusMutation.mutate({ status: 'active' })
+                }}
+                loading={eventStatusMutation.isLoading}
               >
-                <StopOutlined /> End
-              </Button>
-            )}
-            {data?.result.status === 'inactive' && (
-              <Button
-                variant="success"
-                size="sm"
-                shape="round"
-                onClick={() => eventStatusMutation.mutate({ status: 'active' })}
-              >
-                <PlayCircleOutlined /> Start
+                {data?.result.status === 'active' ? (
+                  <>
+                    <StopOutlined /> End
+                  </>
+                ) : data?.result.status === 'inactive' ? (
+                  <>
+                    <PlayCircleOutlined /> Start
+                  </>
+                ) : null}
               </Button>
             )}
           </div>
