@@ -8,7 +8,8 @@ interface StateType {
 
 export const useCandidateSlice = create<StateType>()((set) => ({
   candidate: {
-    avatar: { url: undefined },
+    _id: '',
+    image: { url: undefined },
     calonKetua: '',
     calonWakil: '',
     description: '',
