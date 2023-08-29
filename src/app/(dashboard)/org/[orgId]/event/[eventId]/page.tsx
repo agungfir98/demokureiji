@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { APIReturnType, apiGet, apiPut } from '@/utils/api'
 import { useTokenSlice } from '@/slice/tokenStore'
@@ -46,9 +46,8 @@ const CandidateModal: React.FC = () => {
   const { orgId, eventId } = useParams()
   const { candidate } = useCandidateSlice((s) => s)
   const { accessToken } = useTokenSlice((s) => s)
-  const { showCandidateModal, toggleCandidateModal } = useGlobalStateSlice(
-    (s) => s,
-  )
+  const { showCandidateModal, toggleCandidateModal, userIsAdmin } =
+    useGlobalStateSlice((s) => s)
 
   const queryClient = useQueryClient()
 
@@ -87,76 +86,111 @@ const CandidateModal: React.FC = () => {
     mutate(data as unknown as EditCandidate)
   }
 
-  return (
-    <Modal
-      title="Detail Candidate"
-      open={showCandidateModal}
-      onCancel={() => toggleCandidateModal(false)}
-      footer={null}
-      destroyOnClose
-    >
-      <Form onFinish={SubmitEdit} layout="vertical" className="mt-10">
-        <Form.Item
-          name="avatar"
-          label="Image"
-          valuePropName="list"
-          getValueFromEvent={normFile}
-        >
-          <Upload
-            maxCount={1}
-            listType="picture-card"
-            name="avatar"
-            beforeUpload={() => false}
-          >
-            <UploadOutlined />
-          </Upload>
-        </Form.Item>
-        <div className="flex gap-2">
-          <Form.Item<EditCandidate>
-            name="calonKetua"
-            label="main candidate"
-            initialValue={candidate.calonKetua || ''}
-            className="w-full"
-            rules={[{ required: true, message: 'please input this field' }]}
-          >
-            <Input placeholder="main candidate" />
-          </Form.Item>
-          <Form.Item<EditCandidate>
-            name="calonWakil"
-            label="vice candidate"
-            initialValue={candidate.calonWakil || ''}
-            className="w-full"
-          >
-            <Input placeholder="main candidate" />
-          </Form.Item>
+  if (!userIsAdmin) {
+    return (
+      <Modal
+        title="Detail Candidate"
+        open={showCandidateModal}
+        onCancel={() => toggleCandidateModal(false)}
+        footer={null}
+        destroyOnClose
+      >
+        <div className="w-full">
+          {
+            <Image
+              src={candidate.image?.url || ''}
+              alt={candidate.calonKetua + ' & ' + candidate.calonWakil}
+              width={9}
+              height={0}
+              className="object-cover w-full h-fit rounded-2xl"
+              unoptimized
+            />
+          }
         </div>
-        <Form.Item<EditCandidate>
-          name="description"
-          label="description"
-          initialValue={candidate.description || ''}
-        >
-          <Input.TextArea placeholder="main candidate" rows={5} />
-        </Form.Item>
-        <Button
-          variant="primary"
-          size="md"
-          shape="round"
-          className="w-full mt-10"
-          loading={isLoading}
-        >
-          Submit
-        </Button>
-      </Form>
-    </Modal>
-  )
+        <div className="flex flex-col justify-center items-center my-2">
+          <MainHeading>{candidate.calonKetua}</MainHeading>
+          {candidate.calonWakil && <p className="font-semibold">&</p>}
+          <MainHeading>{candidate.calonWakil}</MainHeading>
+        </div>
+        <div>
+          <p>{candidate.description}</p>
+        </div>
+      </Modal>
+    )
+  } else {
+    return (
+      <Modal
+        title="Detail Candidate"
+        open={showCandidateModal}
+        onCancel={() => toggleCandidateModal(false)}
+        footer={null}
+        destroyOnClose
+      >
+        <Form onFinish={SubmitEdit} layout="vertical" className="mt-10">
+          <Form.Item
+            name="avatar"
+            label="Image"
+            valuePropName="list"
+            getValueFromEvent={normFile}
+          >
+            <Upload
+              maxCount={1}
+              listType="picture-card"
+              name="avatar"
+              beforeUpload={() => false}
+            >
+              <UploadOutlined />
+            </Upload>
+          </Form.Item>
+          <div className="flex gap-2">
+            <Form.Item<EditCandidate>
+              name="calonKetua"
+              label="main candidate"
+              initialValue={candidate.calonKetua || ''}
+              className="w-full"
+              rules={[{ required: true, message: 'please input this field' }]}
+            >
+              <Input placeholder="main candidate" />
+            </Form.Item>
+            <Form.Item<EditCandidate>
+              name="calonWakil"
+              label="vice candidate"
+              initialValue={candidate.calonWakil || ''}
+              className="w-full"
+            >
+              <Input placeholder="main candidate" />
+            </Form.Item>
+          </div>
+          <Form.Item<EditCandidate>
+            name="description"
+            label="description"
+            initialValue={candidate.description || ''}
+          >
+            <Input.TextArea placeholder="main candidate" rows={5} />
+          </Form.Item>
+          <Button
+            variant="primary"
+            size="md"
+            shape="round"
+            className="w-full mt-10"
+            loading={isLoading}
+          >
+            Submit
+          </Button>
+        </Form>
+      </Modal>
+    )
+  }
 }
 
 const EventDetail: React.FC = () => {
   const queryClient = useQueryClient()
   const { eventId, orgId } = useParams()
   const { accessToken } = useTokenSlice((s) => s)
-  const { toggleCandidateModal } = useGlobalStateSlice((s) => s)
+  const { toggleCandidateModal, setUserIsAdmin } = useGlobalStateSlice((s) => s)
   const { setCandidate } = useCandidateSlice((s) => s)
+
+  const router = useRouter()
 
   const { data, isLoading } = useQuery({
     queryKey: ['event-detail'],
@@ -166,6 +200,13 @@ const EventDetail: React.FC = () => {
       ),
     enabled: !!accessToken,
   })
+
+  const sumVoter: number = data?.result.registeredVoters.length as number
+  const numHasVoted: number = data?.result.registeredVoters.filter(
+    (v) => v.hasVoted,
+  ).length as number
+  const percentVoted: number = numHasVoted / sumVoter
+
   const eventStatusMutation = useMutation({
     mutationKey: ['event-status'],
     mutationFn: (payload: { status: VoteEventType['status'] }) =>
@@ -175,7 +216,7 @@ const EventDetail: React.FC = () => {
         accessToken,
       ).then((res) => res.data),
     onError() {
-      toast.error('terjadi kesalahan')
+      toast.error('something went wrong')
     },
     onSuccess(res) {
       toast.success(`Event status is now ${res.result.status}`)
@@ -183,9 +224,10 @@ const EventDetail: React.FC = () => {
     },
   })
 
-  const handleOpenModalCandidate = (data: CandidateType) => {
+  const handleOpenModalCandidate = (data: CandidateType, isAdmin: boolean) => {
     setCandidate(data)
     toggleCandidateModal(true)
+    setUserIsAdmin(isAdmin)
   }
 
   return (
@@ -209,8 +251,18 @@ const EventDetail: React.FC = () => {
               {data?.result.status.slice(1)}
             </Chip>
           </div>
-          <div className="mx-4">
-            {data?.result.status !== 'finished' && (
+          <div className="mx-4 flex">
+            {data?.result.status === 'active' && (
+              <Button
+                variant="primary"
+                size="sm"
+                shape="round"
+                onClick={() => router.push(`/org/${orgId}/vote/${eventId}`)}
+              >
+                Vote
+              </Button>
+            )}
+            {data?.result.status !== 'finished' && data?.isAdmin && (
               <Button
                 variant={
                   data?.result.status === 'active'
@@ -253,7 +305,7 @@ const EventDetail: React.FC = () => {
                 className="w-[250px]"
                 bordered
                 hoverable={!!item.image || data.isAdmin}
-                onClick={() => handleOpenModalCandidate(item)}
+                onClick={() => handleOpenModalCandidate(item, data.isAdmin)}
                 cover={
                   item.image && (
                     <div className="h-[300px] w-full ">
@@ -286,30 +338,32 @@ const EventDetail: React.FC = () => {
             ))}
           </div>
         </div>
-        <div
-          className={`${
-            data?.result.status === 'inactive' ? 'hidden' : ''
-          } mt-5`}
-        >
-          <h2>Stats</h2>
-          <div className="flex justify-center">
-            <div className="sm:w-96">
-              {data && (
-                <PieChart
-                  data={[...data.result.candidates.map((v) => v.numOfVotes)]}
-                  labels={[
-                    ...data.result.candidates.map(
-                      (v) =>
-                        `${v.calonKetua} ${
-                          v.calonWakil ? 'with' + v.calonWakil : ''
-                        }`,
-                    ),
-                  ]}
-                />
-              )}
+        {percentVoted > 0.3 && (
+          <div
+            className={`${
+              data?.result.status === 'inactive' ? 'hidden' : ''
+            } mt-5`}
+          >
+            <h2>Stats</h2>
+            <div className="flex justify-center">
+              <div className="sm:w-96">
+                {data && (
+                  <PieChart
+                    data={[...data.result.candidates.map((v) => v.numOfVotes)]}
+                    labels={[
+                      ...data.result.candidates.map(
+                        (v) =>
+                          `${v.calonKetua} ${
+                            v.calonWakil ? 'with' + v.calonWakil : ''
+                          }`,
+                      ),
+                    ]}
+                  />
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        )}
         <div className="mt-5">
           <h2>Registered Voters ({data?.result.registeredVoters.length})</h2>
           {
