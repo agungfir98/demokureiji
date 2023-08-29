@@ -4,11 +4,6 @@ interface NavType {
   navCollapsed: boolean
   toggleNavCollapsed: (arg: boolean) => void
 }
-export const useNavSlice = create<NavType>()((set) => ({
-  navCollapsed: false,
-  toggleNavCollapsed: () =>
-    set((state) => ({ navCollapsed: !state.navCollapsed })),
-}))
 
 interface GlobalStateType {
   showMemberModal: boolean
@@ -17,7 +12,15 @@ interface GlobalStateType {
   toggleNewEventModal: (arg: boolean) => void
   showCandidateModal: boolean
   toggleCandidateModal: (arag: boolean) => void
+  userIsAdmin: boolean
+  setUserIsAdmin: (arg: boolean) => void
 }
+
+export const useNavSlice = create<NavType>()((set) => ({
+  navCollapsed: false,
+  toggleNavCollapsed: () =>
+    set((state) => ({ navCollapsed: !state.navCollapsed })),
+}))
 
 export const useGlobalStateSlice = create<GlobalStateType>()((set) => ({
   showMemberModal: false,
@@ -31,5 +34,9 @@ export const useGlobalStateSlice = create<GlobalStateType>()((set) => ({
   showCandidateModal: false,
   toggleCandidateModal(arg) {
     set(() => ({ showCandidateModal: arg }))
+  },
+  userIsAdmin: false,
+  setUserIsAdmin(arg) {
+    set(() => ({ userIsAdmin: arg }))
   },
 }))
