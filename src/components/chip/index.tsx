@@ -2,7 +2,7 @@ import React, { ReactNode } from 'react'
 import { VariantProps, cva } from 'class-variance-authority'
 import clsx from 'clsx'
 
-const ChipVariance = cva('px-2 text-sm rounded-xl font-semibold', {
+const ChipVariance = cva('px-2 text-sm rounded-xl font-semibold select-none', {
   variants: {
     variant: {
       default: 'bg-slate-300 text-slate-700',
