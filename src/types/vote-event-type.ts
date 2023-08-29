@@ -5,7 +5,7 @@ export interface CandidateType {
   calonKetua: string
   calonWakil: string
   description: string
-  image: { url: string }
+  image: { url: string | undefined }
 }
 
 interface Candidates {
