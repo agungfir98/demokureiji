@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { apiGet } from '@/utils/api'
+import { APIReturnType, apiGet } from '@/utils/api'
 import { useTokenSlice } from '@/slice/tokenStore'
 import { UserType } from '@/types/user-type'
 import { List, Skeleton } from 'antd'
@@ -15,7 +15,9 @@ const Home: React.FC = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['user-org', accessToken],
     queryFn: () =>
-      apiGet<UserType>('/user', accessToken).then((res) => res.data),
+      apiGet<APIReturnType<UserType>>('/user', accessToken).then(
+        (res) => res.data,
+      ),
     enabled: !!accessToken,
   })
 
@@ -66,7 +68,7 @@ const Home: React.FC = () => {
                         {item.candidates.map((calon, i) => (
                           <Chip key={i}>
                             {calon.calonKetua}
-                            {calon.wakitKetua && ' & ' + calon.wakitKetua}
+                            {calon.calonWakil && ' & ' + calon.calonWakil}
                           </Chip>
                         ))}
                       </div>
