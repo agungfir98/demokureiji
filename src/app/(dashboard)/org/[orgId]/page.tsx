@@ -268,6 +268,7 @@ const Organization: React.FC = () => {
   const { toggleMemberModal, toggleNewEventModal } = useGlobalStateSlice(
     (s) => s,
   )
+  const queryClient = useQueryClient()
 
   const [showModal, setShowModal] = useState<boolean>(false)
 
@@ -291,6 +292,7 @@ const Organization: React.FC = () => {
     },
     onSuccess() {
       toast.success('Organization successfully disbanded')
+      queryClient.invalidateQueries({ queryKey: ['user'] })
       router.push('/org')
     },
   })
