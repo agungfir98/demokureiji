@@ -366,11 +366,13 @@ const Organization: React.FC = () => {
               <MainHeading>{data?.result.organization}</MainHeading>
               <p>{data?.result.description}</p>
             </span>
-            <div>
-              <Dropdown menu={{ items }} placement="bottomRight">
-                <SettingOutlined className="hover:cursor-pointer" />
-              </Dropdown>
-            </div>
+            {data?.isAdmin && (
+              <div className="mx-4">
+                <Dropdown menu={{ items }} placement="bottomRight">
+                  <SettingOutlined className="hover:cursor-pointer" />
+                </Dropdown>
+              </div>
+            )}
           </div>
           <div className="mt-10">
             <div className="flex justify-between">
