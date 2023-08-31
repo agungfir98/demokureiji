@@ -46,7 +46,8 @@ const Organization = () => {
         payload,
         accessToken,
       ).then((res) => res.data.result),
-    onSettled() {
+    onSuccess() {
+      toast.success('Organization successfully created')
       queryClient.invalidateQueries({ queryKey: ['org-list'] })
       setShowModal(false)
     },
