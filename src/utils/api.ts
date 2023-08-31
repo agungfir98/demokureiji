@@ -47,3 +47,10 @@ export const apiPut = async <T, P = object>(
     headers(accessToken),
   )
 }
+
+export const apiDelete = async <T>(
+  path: string,
+  accessToken?: string,
+): Promise<AxiosResponse<T>> => {
+  return api.delete<any, AxiosResponse<T>>(path, headers(accessToken))
+}

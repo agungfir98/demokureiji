@@ -3,7 +3,7 @@ import { MainHeading } from '@/components/heading'
 import Chip from '@/components/chip'
 import { useTokenSlice } from '@/slice/tokenStore'
 import { OrganizationType } from '@/types/organization-type'
-import { APIReturnType, apiGet, apiPost, apiPut } from '@/utils/api'
+import { APIReturnType, apiDelete, apiGet, apiPost, apiPut } from '@/utils/api'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   AutoComplete,
@@ -17,20 +17,25 @@ import {
   Skeleton,
   Typography,
   Button as AntdButton,
+  Dropdown,
 } from 'antd'
+import type { MenuProps } from 'antd'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
-import React from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import React, { useState } from 'react'
 import Button from '@/components/Button'
 import {
+  DeleteOutlined,
   FileAddOutlined,
   MinusOutlined,
   PlusOutlined,
+  SettingOutlined,
   UserAddOutlined,
 } from '@ant-design/icons'
 import { useGlobalStateSlice } from '@/slice/globalslice'
 import { toast } from 'react-hot-toast'
 import { VoteEventType } from '@/types/vote-event-type'
+import axios from 'axios'
 
 interface OrgDataType extends APIReturnType<OrganizationType> {
   isAdmin: boolean
@@ -264,6 +269,10 @@ const Organization: React.FC = () => {
     (s) => s,
   )
 
+  const [showModal, setShowModal] = useState<boolean>(false)
+
+  const router = useRouter()
+
   const { data, isLoading } = useQuery({
     queryKey: ['org-detail'],
     queryFn: () =>
@@ -272,10 +281,82 @@ const Organization: React.FC = () => {
     enabled: !!accessToken,
   })
 
+  const deleteOrgMutation = useMutation({
+    mutationKey: ['delete-org'],
+    mutationFn: () => apiDelete(`/org/${orgId}`, accessToken),
+    onError(err) {
+      if (axios.isAxiosError(err)) {
+        toast.error(err.response?.data)
+      }
+    },
+    onSuccess() {
+      toast.success('Organization successfully disbanded')
+      router.push('/org')
+    },
+  })
+
+  const items: MenuProps['items'] = [
+    {
+      key: '1',
+      danger: true,
+      label: (
+        <>
+          <Button variant="link" onClick={() => setShowModal(true)}>
+            delete this org
+          </Button>
+        </>
+      ),
+      itemIcon: <DeleteOutlined />,
+    },
+  ]
+
+  const disbandOrg = () => {
+    deleteOrgMutation.mutate()
+  }
+
   return (
     <div className="max-h-full overflow-auto">
       <AddMemberModal />
       <NewEventModal />
+      <Modal
+        open={showModal}
+        onCancel={() => setShowModal(false)}
+        footer={null}
+        title={<MainHeading>Disband {data?.result.organization}</MainHeading>}
+      >
+        <Form layout="vertical" onFinish={disbandOrg}>
+          <Form.Item<{ orgName: string }>
+            name="orgName"
+            label={
+              <div>
+                Input{' '}
+                <span className="font-bold">{data?.result.organization}</span>{' '}
+                on the field bellow
+              </div>
+            }
+            rules={[
+              () => ({
+                validator(_, value) {
+                  if (value === data?.result.organization) {
+                    return Promise.resolve()
+                  }
+                  return Promise.reject("you input doesn't match")
+                },
+              }),
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Button
+            variant="danger"
+            size="md"
+            className="w-full"
+            loading={deleteOrgMutation.isLoading}
+          >
+            Confirm
+          </Button>
+        </Form>
+      </Modal>
       <div>
         <Skeleton active loading={isLoading}>
           <div className="flex justify-between">
@@ -283,6 +364,11 @@ const Organization: React.FC = () => {
               <MainHeading>{data?.result.organization}</MainHeading>
               <p>{data?.result.description}</p>
             </span>
+            <div>
+              <Dropdown menu={{ items }} placement="bottomRight">
+                <SettingOutlined className="hover:cursor-pointer" />
+              </Dropdown>
+            </div>
           </div>
           <div className="mt-10">
             <div className="flex justify-between">
