@@ -13,8 +13,13 @@ import { useTokenSlice } from '@/slice/tokenStore'
 import Link from 'next/link'
 import { UserType } from '@/types/user-type'
 import toast from 'react-hot-toast'
+import { OrganizationType } from '@/types/organization-type'
 
 type MenuItem = Required<MenuProps>['items'][number]
+interface OrgApiType<T> {
+  status: string
+  data: T
+}
 
 function getItem(
   label: React.ReactNode,
@@ -59,6 +64,16 @@ const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
     refetchOnWindowFocus: false,
   })
 
+  const { data: orgData } = useQuery({
+    queryKey: ['org-list'],
+    queryFn: () =>
+      apiGet<OrgApiType<OrganizationType[]>>('/org', accessToken).then(
+        (res) => res.data,
+      ),
+    enabled: !!accessToken,
+    refetchOnWindowFocus: false,
+  })
+
   const items: MenuItem[] = [
     getItem(<Link href={`/`}>Home</Link>, '1', <HomeTwoTone />),
     getItem(
@@ -67,7 +82,7 @@ const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
       <Link href={`/org`}>
         <TeamOutlined />
       </Link>,
-      userData?.result.organization.map((v, i) =>
+      orgData?.data.map((v, i) =>
         getItem(
           <Link href={`/org/${v._id}`}>{v.organization}</Link>,
           `2${i + 1}`,

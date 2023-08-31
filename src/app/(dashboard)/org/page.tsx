@@ -31,7 +31,7 @@ const Organization = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['org-list'],
     queryFn: () =>
-      apiGet<OrgApiType<OrganizationType>>('/org', accessToken).then(
+      apiGet<OrgApiType<OrganizationType[]>>('/org', accessToken).then(
         (res) => res.data,
       ),
     enabled: !!accessToken,
@@ -48,7 +48,7 @@ const Organization = () => {
       ).then((res) => res.data.result),
     onSuccess() {
       toast.success('Organization successfully created')
-      queryClient.invalidateQueries({ queryKey: ['org-list'] })
+      queryClient.invalidateQueries(['org-list'])
       setShowModal(false)
     },
     onError(error) {
