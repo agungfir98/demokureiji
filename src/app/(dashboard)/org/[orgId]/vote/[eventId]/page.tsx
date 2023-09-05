@@ -8,8 +8,7 @@ import { VoteEventType } from '@/types/vote-event-type'
 import { MainHeading } from '@/components/heading'
 import Button from '@/components/Button'
 import Chip from '@/components/chip'
-import { Card, Modal, Skeleton } from 'antd'
-import PieChart from '@/components/chart/piechart'
+import { Card, Modal, Popconfirm, Skeleton } from 'antd'
 import Image from 'next/image'
 import toast from 'react-hot-toast'
 import axios from 'axios'
@@ -78,12 +77,6 @@ const EventDetail: React.FC = () => {
     enabled: !!accessToken,
   })
 
-  const sumVoter: number = data?.result.registeredVoters.length as number
-  const numHasVoted: number = data?.result.registeredVoters.filter(
-    (v) => v.hasVoted,
-  ).length as number
-  const percentVoted: number = numHasVoted / sumVoter
-
   const voteMutation = useMutation({
     mutationKey: ['vote'],
     mutationFn: (candidateId: string) =>
@@ -123,7 +116,7 @@ const EventDetail: React.FC = () => {
               {data?.result.status.charAt(0).toUpperCase()}
               {data?.result.status.slice(1)}
             </Chip>
-            <Chip variant="success">{data?.hasVoted && 'you have voted'}</Chip>
+            {data?.hasVoted && <Chip variant="success">you have voted</Chip>}
           </div>
         </div>
         <div>
@@ -171,18 +164,26 @@ const EventDetail: React.FC = () => {
                 <div className="flex flex-col gap-4">
                   {!item.image && <p className="mt-3">{item.description}</p>}
                   {data.result.status === 'active' && !data.hasVoted && (
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      shape="round"
-                      id="votebtn"
-                      className={!!item.image && 'mt-5'}
-                      onClick={() => {
-                        voteMutation.mutate(item._id)
-                      }}
+                    <Popconfirm
+                      title={
+                        <p>
+                          confirm vote {item.calonKetua}{' '}
+                          {item.calonWakil ? `& ${item.calonWakil}` : null}
+                        </p>
+                      }
+                      okButtonProps={{ loading: voteMutation.isLoading }}
+                      onConfirm={() => voteMutation.mutate(item._id)}
                     >
-                      Vote
-                    </Button>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        shape="round"
+                        id="votebtn"
+                        className={!!item.image && 'mt-5'}
+                      >
+                        Vote
+                      </Button>
+                    </Popconfirm>
                   )}
                 </div>
               </Card>

@@ -218,7 +218,7 @@ const NewEventModal = () => {
                       <Form.Item
                         {...restField}
                         initialValue={''}
-                        name={[name, 'wakilKetua']}
+                        name={[name, 'calonWakil']}
                         label="vice candidate"
                       >
                         <Input placeholder="vice candidate" />
@@ -230,6 +230,9 @@ const NewEventModal = () => {
                     initialValue={''}
                     name={[name, 'description']}
                     label="description"
+                    rules={[
+                      { required: true, message: 'please input this field' },
+                    ]}
                   >
                     <Input.TextArea rows={3} />
                   </Form.Item>
