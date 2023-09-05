@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query'
 import { HomeTwoTone, TeamOutlined } from '@ant-design/icons'
 import { Menu } from 'antd'
 import type { MenuProps } from 'antd'
-import { AxiosError } from 'axios'
+import axios, { AxiosError } from 'axios'
 import { ReactNode } from 'react'
 import { useNavSlice } from '@/slice/globalslice'
 import { useTokenSlice } from '@/slice/tokenStore'
@@ -14,6 +14,7 @@ import Link from 'next/link'
 import { UserType } from '@/types/user-type'
 import toast from 'react-hot-toast'
 import { OrganizationType } from '@/types/organization-type'
+import { useRouter } from 'next/navigation'
 
 type MenuItem = Required<MenuProps>['items'][number]
 interface OrgApiType<T> {
@@ -35,6 +36,8 @@ const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { setAccessToken, accessToken } = useTokenSlice((state) => state)
   const navCollapsed = useNavSlice((state) => state.navCollapsed)
 
+  const router = useRouter()
+
   const { isLoading } = useQuery({
     queryKey: ['access-token'],
     queryFn: () =>
@@ -43,9 +46,12 @@ const Layout: React.FC<{ children: ReactNode }> = ({ children }) => {
       const { token } = data
       setAccessToken(token)
     },
-    onError() {
-      console.error('something went wrong, please refresh the page')
-      toast.error('something went wrong, please refresh the page')
+    onError(err) {
+      if (!axios.isAxiosError(err)) return
+
+      if (err.response?.data.status === 'notoken') router.push('/auth/signin')
+      if (err.response?.data.status === 'invalidtoken')
+        toast.error('something went wrong, please refresh the page')
     },
     refetchOnWindowFocus: false,
     refetchInterval: 300000,
